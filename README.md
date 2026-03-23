@@ -10,7 +10,7 @@ Control your terminal from your phone. Run a lightweight server on your Mac or L
 ## How It Works
 
 ```
-┌──────────────┐     WebSocket (LAN)     ┌──────────────────┐
+┌──────────────┐     WebSocket (LAN)      ┌──────────────────┐
 │   iPhone     │ ◄──────────────────────► │  Mac / Linux     │
 │              │                          │                  │
 │  xterm.js    │   JSON protocol over WS  │  PTY sessions    │
@@ -29,24 +29,24 @@ Control your terminal from your phone. Run a lightweight server on your Mac or L
 
 ### Server (Rust)
 
-| Crate | Purpose |
-|-------|---------|
-| [tokio](https://tokio.rs) | Async runtime |
-| [tokio-tungstenite](https://github.com/snapview/tokio-tungstenite) | WebSocket server |
-| [portable-pty](https://docs.rs/portable-pty) | Cross-platform PTY management |
-| [ratatui](https://ratatui.rs) + [crossterm](https://docs.rs/crossterm) | TUI dashboard |
-| [rcgen](https://docs.rs/rcgen) + [rustls](https://docs.rs/rustls) | Self-signed TLS certificate generation |
-| [clap](https://docs.rs/clap) | CLI argument parsing |
-| [qr2term](https://docs.rs/qr2term) | QR code display in terminal |
+| Crate                                                                  | Purpose                                |
+| ---------------------------------------------------------------------- | -------------------------------------- |
+| [tokio](https://tokio.rs)                                              | Async runtime                          |
+| [tokio-tungstenite](https://github.com/snapview/tokio-tungstenite)     | WebSocket server                       |
+| [portable-pty](https://docs.rs/portable-pty)                           | Cross-platform PTY management          |
+| [ratatui](https://ratatui.rs) + [crossterm](https://docs.rs/crossterm) | TUI dashboard                          |
+| [rcgen](https://docs.rs/rcgen) + [rustls](https://docs.rs/rustls)      | Self-signed TLS certificate generation |
+| [clap](https://docs.rs/clap)                                           | CLI argument parsing                   |
+| [qr2term](https://docs.rs/qr2term)                                     | QR code display in terminal            |
 
 ### iOS App (Swift)
 
-| Technology | Purpose |
-|------------|---------|
-| SwiftUI | Native UI framework |
-| WKWebView + [xterm.js](https://xtermjs.org) | Terminal rendering |
-| AVFoundation | QR code scanning |
-| URLSessionWebSocketTask | WebSocket client |
+| Technology                                  | Purpose             |
+| ------------------------------------------- | ------------------- |
+| SwiftUI                                     | Native UI framework |
+| WKWebView + [xterm.js](https://xtermjs.org) | Terminal rendering  |
+| AVFoundation                                | QR code scanning    |
+| URLSessionWebSocketTask                     | WebSocket client    |
 
 ## Prerequisites
 
@@ -115,10 +115,10 @@ When running with the TUI (default), the dashboard shows:
 
 Keyboard shortcuts:
 
-| Key | Action |
-|-----|--------|
-| `q` | Quit |
-| `r` | Regenerate auth token |
+| Key | Action                 |
+| --- | ---------------------- |
+| `q` | Quit                   |
+| `r` | Regenerate auth token  |
 | `d` | Disconnect all devices |
 
 ### Connect from iOS
@@ -142,20 +142,20 @@ Communication uses JSON messages over WebSocket with a `"type"` discriminator:
 Client                          Server
   │                               │
   │──── Auth { token } ──────────►│
-  │◄─── AuthOk { device_id } ────│
+  │◄─── AuthOk { device_id } ─────│
   │                               │
   │──── SessionCreate ───────────►│
-  │◄─── SessionCreated { id } ───│
+  │◄─── SessionCreated { id } ────│
   │                               │
   │──── Input { session, data } ─►│
   │◄─── Output { session, data } ─│  (base64-encoded)
   │                               │
   │──── Resize { cols, rows } ───►│
   │──── Ping { timestamp } ──────►│
-  │◄─── Pong { timestamp } ──────│
+  │◄─── Pong { timestamp } ───────│
   │                               │
   │──── SessionClose { id } ─────►│
-  │◄─── SessionClosed { id } ────│
+  │◄─── SessionClosed { id } ─────│
 ```
 
 ## Project Structure
