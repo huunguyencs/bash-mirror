@@ -1,0 +1,50 @@
+name: BashMirror
+options:
+  bundleIdPrefix: com.bashmirror
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "15.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+targets:
+  BashMirror:
+    type: application
+    platform: iOS
+    sources:
+      - path: BashMirror
+        excludes:
+          - Resources/**
+          - "*.html"
+          - "*.js"
+          - "*.css"
+      - path: BashMirror/terminal.html
+        buildPhase: resources
+      - path: BashMirror/xterm.js
+        buildPhase: resources
+      - path: BashMirror/xterm.css
+        buildPhase: resources
+      - path: BashMirror/xterm-addon-fit.js
+        buildPhase: resources
+    settings:
+      base:
+        INFOPLIST_KEY_UILaunchScreen_Generation: true
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
+        INFOPLIST_KEY_CFBundleDisplayName: "BashMirror"
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: "0.1.0"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 567XX8P6V6
+        PRODUCT_BUNDLE_IDENTIFIER: com.nguyenvanhuu.bashmirror
+        DEBUG_INFORMATION_FORMAT: "dwarf"
+        ENABLE_DEBUG_DYLIB: "NO"
+    info:
+      path: BashMirror/Info.plist
+      properties:
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        NSCameraUsageDescription: "BashMirror needs camera access to scan QR codes"
+        CFBundleURLTypes:
+          - CFBundleURLName: com.bashmirror.app
+            CFBundleURLSchemes:
+              - bashmirror

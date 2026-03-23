@@ -1,0 +1,23 @@
+[package]
+name = "bash-mirror-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bash-mirror-proto = { path = "../bash-mirror-proto" }
+portable-pty = "0.8"
+tokio = { version = "1", features = ["full"] }
+rcgen = "0.13"
+rustls = "0.23"
+rustls-pki-types = "1"
+tokio-rustls = "0.26"
+rand = "0.8"
+uuid = { version = "1", features = ["v4"] }
+qr2term = "0.3"
+local-ip-address = "0.6"
+anyhow = "1"
+libc = "0.2"
+tracing = "0.1"
+base64 = "0.22"
+sha2 = "0.10"
+hex = "0.4"
