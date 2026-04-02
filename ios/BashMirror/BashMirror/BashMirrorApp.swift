@@ -50,11 +50,20 @@ struct ScannerContainerView: View {
     @EnvironmentObject var connectionManager: ConnectionManager
     @State private var showManualEntry = false
 
+    private var safeAreaTop: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)?
+            .safeAreaInsets.top ?? 0
+    }
+
     var body: some View {
         ZStack {
             Theme.Colors.background.ignoresSafeArea()
 
-            VStack(spacing: 0) {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
                 // Header branding
                 VStack(spacing: 8) {
                     Text("REMOTE TERMINAL")
@@ -71,7 +80,7 @@ struct ScannerContainerView: View {
                         .foregroundColor(Theme.Colors.textTertiary)
                         .padding(.top, 4)
                 }
-                .padding(.top, 60)
+                .padding(.top, safeAreaTop + 16)
 
                 // Scanner area
                 VStack(spacing: 16) {
@@ -106,7 +115,7 @@ struct ScannerContainerView: View {
                         }
                         .opacity(0.01) // Hidden but active for camera capture
                     }
-                    .frame(width: 280, height: 280)
+                    .frame(width: 240, height: 240)
 
                     // Status indicator
                     HStack(spacing: 8) {
@@ -119,7 +128,7 @@ struct ScannerContainerView: View {
                             .foregroundColor(Theme.Colors.textSecondary)
                     }
                 }
-                .padding(.top, 40)
+                .padding(.top, 24)
 
                 // CTAs
                 VStack(spacing: 12) {
@@ -146,9 +155,7 @@ struct ScannerContainerView: View {
                     }
                 }
                 .padding(.horizontal, 32)
-                .padding(.top, 40)
-
-                Spacer()
+                .padding(.top, 24)
 
                 // Footer
                 VStack(spacing: 4) {
@@ -159,7 +166,9 @@ struct ScannerContainerView: View {
                         .font(Theme.Fonts.captionSmall)
                         .foregroundColor(Color(hex: "334155"))
                 }
-                .padding(.bottom, 48)
+                .padding(.top, 32)
+                .padding(.bottom, 24)
+                }
             }
         }
         .sheet(isPresented: $showManualEntry) {
