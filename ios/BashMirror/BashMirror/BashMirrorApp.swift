@@ -1,25 +1,15 @@
-import UIKit
 import SwiftUI
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
-    private let connectionManager = ConnectionManager()
+struct BashMirrorApp: App {
+    @StateObject private var connectionManager = ConnectionManager()
 
-    func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool {
-        let rootView = ContentView()
-            .environmentObject(connectionManager)
-            .preferredColorScheme(.dark)
-
-        let hosting = UIHostingController(rootView: rootView)
-
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = hosting
-        window?.makeKeyAndVisible()
-        return true
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(connectionManager)
+                .preferredColorScheme(.dark)
+        }
     }
 }
 
