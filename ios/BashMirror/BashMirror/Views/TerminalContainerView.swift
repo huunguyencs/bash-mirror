@@ -32,7 +32,8 @@ struct TerminalContainerView: View {
                 .padding(.bottom, safeAreaBottom)
             }
         }
-        .background(Theme.Colors.background.ignoresSafeArea())
+        .background(Theme.Colors.background)
+        .ignoresSafeArea()
     }
 
     private var safeAreaTop: CGFloat {

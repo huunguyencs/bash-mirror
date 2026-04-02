@@ -15,9 +15,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             .preferredColorScheme(.dark)
 
         let hosting = UIHostingController(rootView: rootView)
-        // Remove container safe area so SwiftUI gets the full screen frame.
-        // This is why .ignoresSafeArea() alone never worked.
-        hosting.safeAreaRegions.remove(.container)
 
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = hosting
@@ -50,20 +47,11 @@ struct ScannerContainerView: View {
     @EnvironmentObject var connectionManager: ConnectionManager
     @State private var showManualEntry = false
 
-    private var safeAreaTop: CGFloat {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows)
-            .first(where: \.isKeyWindow)?
-            .safeAreaInsets.top ?? 0
-    }
-
     var body: some View {
         ZStack {
             Theme.Colors.background.ignoresSafeArea()
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
+            VStack(spacing: 0) {
                 // Header branding
                 VStack(spacing: 8) {
                     Text("REMOTE TERMINAL")
@@ -80,10 +68,10 @@ struct ScannerContainerView: View {
                         .foregroundColor(Theme.Colors.textTertiary)
                         .padding(.top, 4)
                 }
-                .padding(.top, safeAreaTop + 16)
+                .padding(.top, 20)
 
                 // Scanner area
-                VStack(spacing: 16) {
+                VStack(spacing: 10) {
                     ZStack {
                         RoundedRectangle(cornerRadius: Theme.Radii.scanner)
                             .fill(
@@ -100,7 +88,7 @@ struct ScannerContainerView: View {
 
                         VStack(spacing: 16) {
                             Image(systemName: "chevron.right.square")
-                                .font(.system(size: 48, weight: .light))
+                                .font(.system(size: 40, weight: .light))
                                 .foregroundColor(Theme.Colors.accent)
 
                             Text("Point camera at\nQR code on terminal")
@@ -115,7 +103,7 @@ struct ScannerContainerView: View {
                         }
                         .opacity(0.01) // Hidden but active for camera capture
                     }
-                    .frame(width: 240, height: 240)
+                    .frame(width: 200, height: 200)
 
                     // Status indicator
                     HStack(spacing: 8) {
@@ -128,7 +116,7 @@ struct ScannerContainerView: View {
                             .foregroundColor(Theme.Colors.textSecondary)
                     }
                 }
-                .padding(.top, 24)
+                .padding(.top, 16)
 
                 // CTAs
                 VStack(spacing: 12) {
@@ -138,7 +126,7 @@ struct ScannerContainerView: View {
                         Text("Scan QR Code")
                             .font(Theme.Fonts.body.weight(.semibold))
                             .foregroundColor(Theme.Colors.background)
-                            .frame(maxWidth: .infinity, minHeight: 52)
+                            .frame(maxWidth: .infinity, minHeight: 48)
                             .background(Theme.Colors.accent)
                             .cornerRadius(Theme.Radii.button)
                     }
@@ -147,7 +135,7 @@ struct ScannerContainerView: View {
                         Text("Connect Manually")
                             .font(Theme.Fonts.body.weight(.medium))
                             .foregroundColor(Theme.Colors.accent)
-                            .frame(maxWidth: .infinity, minHeight: 52)
+                            .frame(maxWidth: .infinity, minHeight: 48)
                             .overlay(
                                 RoundedRectangle(cornerRadius: Theme.Radii.button)
                                     .stroke(Theme.Colors.accentBorder, lineWidth: 1.5)
@@ -156,6 +144,8 @@ struct ScannerContainerView: View {
                 }
                 .padding(.horizontal, 32)
                 .padding(.top, 24)
+
+                Spacer()
 
                 // Footer
                 VStack(spacing: 4) {
@@ -166,9 +156,7 @@ struct ScannerContainerView: View {
                         .font(Theme.Fonts.captionSmall)
                         .foregroundColor(Color(hex: "334155"))
                 }
-                .padding(.top, 32)
-                .padding(.bottom, 24)
-                }
+                .padding(.bottom, 16)
             }
         }
         .sheet(isPresented: $showManualEntry) {
