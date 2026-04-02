@@ -1,10 +1,12 @@
 import Foundation
+import CryptoKit
 
 class WebSocketService: NSObject, URLSessionWebSocketDelegate, ObservableObject {
     @Published var isConnected = false
 
     private var webSocket: URLSessionWebSocketTask?
     private var session: URLSession!
+    private var expectedFingerprint: String?
     var onMessage: ((ServerMessage) -> Void)?
     var onDisconnect: (() -> Void)?
 
@@ -13,9 +15,10 @@ class WebSocketService: NSObject, URLSessionWebSocketDelegate, ObservableObject 
         session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
     }
 
-    func connect(url: URL, token: String) {
+    func connect(url: URL, token: String, fingerprint: String? = nil) {
         disconnect()
 
+        expectedFingerprint = fingerprint
         webSocket = session.webSocketTask(with: url)
         webSocket?.resume()
 
@@ -27,6 +30,7 @@ class WebSocketService: NSObject, URLSessionWebSocketDelegate, ObservableObject 
     func disconnect() {
         webSocket?.cancel(with: .goingAway, reason: nil)
         webSocket = nil
+        expectedFingerprint = nil
         DispatchQueue.main.async { self.isConnected = false }
     }
 
@@ -95,16 +99,41 @@ class WebSocketService: NSObject, URLSessionWebSocketDelegate, ObservableObject 
         }
     }
 
-    // Trust self-signed certificates
+    // Trust self-signed certificates with fingerprint pinning
     func urlSession(_ session: URLSession,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
-           let trust = challenge.protectionSpace.serverTrust {
-            // TODO: Pin cert fingerprint from QR payload
-            completionHandler(.useCredential, URLCredential(trust: trust))
-        } else {
+        guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+              let trust = challenge.protectionSpace.serverTrust else {
             completionHandler(.performDefaultHandling, nil)
+            return
+        }
+
+        // If no fingerprint provided, trust any cert (e.g. --no-tls fallback or manual connect without fingerprint)
+        guard let expected = expectedFingerprint, !expected.isEmpty else {
+            completionHandler(.useCredential, URLCredential(trust: trust))
+            return
+        }
+
+        // Extract server certificate and compute SHA-256 fingerprint
+        if let certChain = SecTrustCopyCertificateChain(trust) as? [SecCertificate],
+           let serverCert = certChain.first {
+            let certData = SecCertificateCopyData(serverCert) as Data
+            let hash = SHA256.hash(data: certData)
+            let fingerprint = hash.map { String(format: "%02x", $0) }.joined(separator: ":")
+
+            if fingerprint == expected {
+                print("[WS] Certificate fingerprint verified")
+                completionHandler(.useCredential, URLCredential(trust: trust))
+            } else {
+                print("[WS] Certificate fingerprint mismatch!")
+                print("[WS]   Expected: \(expected)")
+                print("[WS]   Got:      \(fingerprint)")
+                completionHandler(.cancelAuthenticationChallenge, nil)
+            }
+        } else {
+            print("[WS] Could not extract server certificate")
+            completionHandler(.cancelAuthenticationChallenge, nil)
         }
     }
 }

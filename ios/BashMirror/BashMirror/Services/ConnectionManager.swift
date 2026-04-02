@@ -29,7 +29,7 @@ class ConnectionManager: ObservableObject {
     }
 
     func connectFromQR(_ qrString: String) {
-        // Parse: bashmirror://192.168.1.100:8765?token=abc123&fp=SHA256:...
+        // Parse: bashmirror://192.168.1.100:8765?token=abc123&fp=aa:bb:cc:...
         guard let components = URLComponents(string: qrString),
               let host = components.host,
               let port = components.port,
@@ -39,20 +39,23 @@ class ConnectionManager: ObservableObject {
             return
         }
 
-        connect(host: host, port: port, token: token)
+        let fingerprint = components.queryItems?.first(where: { $0.name == "fp" })?.value
+
+        connect(host: host, port: port, token: token, fingerprint: fingerprint)
     }
 
-    func connect(host: String, port: Int, token: String) {
+    func connect(host: String, port: Int, token: String, fingerprint: String? = nil) {
         state = .connecting
 
-        // Use ws:// for Phase 1 (no TLS yet)
-        guard let url = URL(string: "ws://\(host):\(port)") else {
+        // Use wss:// when fingerprint is present (TLS enabled), ws:// otherwise
+        let scheme = (fingerprint != nil && !fingerprint!.isEmpty) ? "wss" : "ws"
+        guard let url = URL(string: "\(scheme)://\(host):\(port)") else {
             errorMessage = "Invalid URL"
             state = .disconnected
             return
         }
 
-        webSocket.connect(url: url, token: token)
+        webSocket.connect(url: url, token: token, fingerprint: fingerprint)
     }
 
     func createSession() {

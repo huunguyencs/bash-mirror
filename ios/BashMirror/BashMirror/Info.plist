@@ -16,17 +16,6 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
-	<key>CFBundleVersion</key>
-	<string>1</string>
-	<key>UILaunchScreen</key>
-	<dict/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-	</dict>
-	<key>NSCameraUsageDescription</key>
-	<string>BashMirror needs camera access to scan QR codes</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -38,5 +27,16 @@
 			</array>
 		</dict>
 	</array>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>BashMirror needs camera access to scan QR codes</string>
+	<key>UILaunchScreen</key>
+	<dict/>
 </dict>
 </plist>

@@ -13,12 +13,11 @@
 		280E3F3991728800D77A8395 /* xterm.css in Resources */ = {isa = PBXBuildFile; fileRef = B3DA7012E77DB50C8C085AC9 /* xterm.css */; };
 		2F1356E87D135F06A14DD07D /* TerminalContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2289313C6C772133B7514E4 /* TerminalContainerView.swift */; };
 		30AB7B6E909F2C5FC26B925F /* ScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB833A82ACE5483B6FAF2CB8 /* ScannerView.swift */; };
-		7AB6BB368D16AED6C4BD616D /* CommandPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89DBF9F8ACEAD39B544052B9 /* CommandPadView.swift */; };
 		82E3572159698C1CB0078EE0 /* ProtocolMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAC36CF72AD85B11C9D91AD /* ProtocolMessages.swift */; };
 		A24086D838A1A6A59C791019 /* BashMirrorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2177973234CE15AA316B10B7 /* BashMirrorApp.swift */; };
 		AD0926683398B143139FDE5C /* FullKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558B786686521024641635A4 /* FullKeyboardView.swift */; };
 		BA58386E69B3B086F05A45AB /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD05265ABF69C4D01CFBE5FD /* Extensions.swift */; };
-		E1A2B3C4D5E6F7A8B9C0D1E2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B3C4D5E6F7A8B9C0D1E2F3 /* Theme.swift */; };
+		BD77A9949EF88760C6753D50 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F32AE55DF4663A79E511B604 /* Theme.swift */; };
 		C3D720C9C81522111F5984B1 /* WebSocketService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7F43DBAC9DB7F10BD4A07B /* WebSocketService.swift */; };
 		C6E26BD024A837A8922723E9 /* xterm.js in Resources */ = {isa = PBXBuildFile; fileRef = 60BEE34E6CDE1017ECB18E72 /* xterm.js */; };
 		C8965E29A356C3F59239DE8F /* xterm-addon-fit.js in Resources */ = {isa = PBXBuildFile; fileRef = CE39153CD09F0F059AD3789C /* xterm-addon-fit.js */; };
@@ -33,16 +32,15 @@
 		577736ADCA4B06D302467B06 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		60BEE34E6CDE1017ECB18E72 /* xterm.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = xterm.js; sourceTree = "<group>"; };
 		69DB8502FA85C6F241B6E81E /* terminal.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = terminal.html; sourceTree = "<group>"; };
-		89DBF9F8ACEAD39B544052B9 /* CommandPadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPadView.swift; sourceTree = "<group>"; };
 		8EAC36CF72AD85B11C9D91AD /* ProtocolMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtocolMessages.swift; sourceTree = "<group>"; };
 		AD05265ABF69C4D01CFBE5FD /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		F2B3C4D5E6F7A8B9C0D1E2F3 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		B3DA7012E77DB50C8C085AC9 /* xterm.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = xterm.css; sourceTree = "<group>"; };
 		C220BE3FD3751622AC94A71B /* ManualConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualConnectView.swift; sourceTree = "<group>"; };
 		CE39153CD09F0F059AD3789C /* xterm-addon-fit.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "xterm-addon-fit.js"; sourceTree = "<group>"; };
 		D2289313C6C772133B7514E4 /* TerminalContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalContainerView.swift; sourceTree = "<group>"; };
 		DB833A82ACE5483B6FAF2CB8 /* ScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerView.swift; sourceTree = "<group>"; };
 		DF7F43DBAC9DB7F10BD4A07B /* WebSocketService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketService.swift; sourceTree = "<group>"; };
+		F32AE55DF4663A79E511B604 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		FECCC47C481E249CD8F3CD22 /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -69,9 +67,9 @@
 			children = (
 				2177973234CE15AA316B10B7 /* BashMirrorApp.swift */,
 				AD05265ABF69C4D01CFBE5FD /* Extensions.swift */,
-				F2B3C4D5E6F7A8B9C0D1E2F3 /* Theme.swift */,
 				577736ADCA4B06D302467B06 /* Info.plist */,
 				69DB8502FA85C6F241B6E81E /* terminal.html */,
+				F32AE55DF4663A79E511B604 /* Theme.swift */,
 				CE39153CD09F0F059AD3789C /* xterm-addon-fit.js */,
 				B3DA7012E77DB50C8C085AC9 /* xterm.css */,
 				60BEE34E6CDE1017ECB18E72 /* xterm.js */,
@@ -105,7 +103,6 @@
 		BADD5FF44621FE6C5A3B5894 /* Keyboard */ = {
 			isa = PBXGroup;
 			children = (
-				89DBF9F8ACEAD39B544052B9 /* CommandPadView.swift */,
 				558B786686521024641635A4 /* FullKeyboardView.swift */,
 			);
 			path = Keyboard;
@@ -194,16 +191,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				A24086D838A1A6A59C791019 /* BashMirrorApp.swift in Sources */,
-				7AB6BB368D16AED6C4BD616D /* CommandPadView.swift in Sources */,
 				1F3CBCAF726C03E940500A72 /* ConnectionManager.swift in Sources */,
 				BA58386E69B3B086F05A45AB /* Extensions.swift in Sources */,
-				E1A2B3C4D5E6F7A8B9C0D1E2 /* Theme.swift in Sources */,
 				AD0926683398B143139FDE5C /* FullKeyboardView.swift in Sources */,
 				19F0E7C496ACB8A9A2BEEE97 /* ManualConnectView.swift in Sources */,
 				82E3572159698C1CB0078EE0 /* ProtocolMessages.swift in Sources */,
 				30AB7B6E909F2C5FC26B925F /* ScannerView.swift in Sources */,
 				2F1356E87D135F06A14DD07D /* TerminalContainerView.swift in Sources */,
 				D3A2AF6912A971DCD8652C27 /* TerminalView.swift in Sources */,
+				BD77A9949EF88760C6753D50 /* Theme.swift in Sources */,
 				C3D720C9C81522111F5984B1 /* WebSocketService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -279,7 +275,6 @@
 				ENABLE_DEBUG_DYLIB = NO;
 				INFOPLIST_FILE = BashMirror/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = BashMirror;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -367,7 +362,6 @@
 				ENABLE_DEBUG_DYLIB = NO;
 				INFOPLIST_FILE = BashMirror/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = BashMirror;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
