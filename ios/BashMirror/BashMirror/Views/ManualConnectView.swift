@@ -77,6 +77,28 @@ struct ManualConnectView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 28)
 
+                // Auth error banner
+                if let error = connectionManager.authError {
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 14))
+                            .foregroundColor(Theme.Colors.danger)
+                        Text(error)
+                            .font(Theme.Fonts.captionSmall)
+                            .foregroundColor(Theme.Colors.danger)
+                    }
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.Colors.danger.opacity(0.1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Theme.Radii.input)
+                            .stroke(Theme.Colors.danger.opacity(0.3), lineWidth: 1)
+                    )
+                    .cornerRadius(Theme.Radii.input)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 16)
+                }
+
                 // Connect button
                 VStack(spacing: 16) {
                     Button(action: {
@@ -109,6 +131,9 @@ struct ManualConnectView: View {
                 Spacer()
             }
         }
+        .onChange(of: host) { connectionManager.authError = nil }
+        .onChange(of: port) { connectionManager.authError = nil }
+        .onChange(of: token) { connectionManager.authError = nil }
         .presentationBackground(Theme.Colors.background)
     }
 }
