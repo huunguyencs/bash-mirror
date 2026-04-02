@@ -12,6 +12,7 @@ class ConnectionManager: ObservableObject {
     @Published var sessions: [String] = []
     @Published var activeSessionId: String?
     @Published var errorMessage: String?
+    @Published var authError: String?
 
     // Connection metadata for session manager
     private(set) var connectedHost: String = ""
@@ -35,6 +36,7 @@ class ConnectionManager: ObservableObject {
     }
 
     func connectFromQR(_ qrString: String) {
+        authError = nil
         // Parse: bashmirror://192.168.1.100:8765?token=abc123&fp=aa:bb:cc:...
         guard let components = URLComponents(string: qrString),
               let host = components.host,
@@ -63,6 +65,7 @@ class ConnectionManager: ObservableObject {
 
     func connect(host: String, port: Int, token: String, fingerprint: String? = nil) {
         state = .connecting
+        authError = nil
         connectedHost = host
         connectedPort = port
         useTLS = fingerprint != nil && !fingerprint!.isEmpty
@@ -116,7 +119,16 @@ class ConnectionManager: ObservableObject {
 
         case .authFail(let reason):
             state = .disconnected
-            errorMessage = "Auth failed: \(reason)"
+            switch reason {
+            case "token_expired":
+                authError = "Token expired — generate a new one on the server"
+            case "token_invalid":
+                authError = "Invalid token — check and try again"
+            case "token_consumed":
+                authError = "Token already used — generate a new one on the server"
+            default:
+                authError = "Authentication failed: \(reason)"
+            }
 
         case .output(let session, let data):
             // Pass base64 directly to terminal — JS will decode it
