@@ -36,6 +36,7 @@ struct ContentView: View {
 struct ScannerContainerView: View {
     @EnvironmentObject var connectionManager: ConnectionManager
     @State private var showManualEntry = false
+    @State private var showError = false
 
     var body: some View {
         ZStack {
@@ -105,6 +106,32 @@ struct ScannerContainerView: View {
                             .font(Theme.Fonts.captionSmall)
                             .foregroundColor(Theme.Colors.textSecondary)
                     }
+
+                    // Auth error
+                    if showError, let error = connectionManager.authError {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 14))
+                                .foregroundColor(Theme.Colors.danger)
+                            Text(error)
+                                .font(Theme.Fonts.captionSmall)
+                                .foregroundColor(Theme.Colors.danger)
+                                .lineLimit(2)
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Theme.Colors.danger.opacity(0.1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Theme.Radii.input)
+                                .stroke(Theme.Colors.danger.opacity(0.3), lineWidth: 1)
+                        )
+                        .cornerRadius(Theme.Radii.input)
+                        .padding(.horizontal, 32)
+                        .onTapGesture {
+                            connectionManager.authError = nil
+                            showError = false
+                        }
+                    }
                 }
                 .padding(.top, 16)
 
@@ -147,6 +174,15 @@ struct ScannerContainerView: View {
                         .foregroundColor(Color(hex: "334155"))
                 }
                 .padding(.bottom, 16)
+            }
+        }
+        .onChange(of: connectionManager.authError) {
+            if connectionManager.authError != nil {
+                showError = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                    showError = false
+                    connectionManager.authError = nil
+                }
             }
         }
         .sheet(isPresented: $showManualEntry) {
