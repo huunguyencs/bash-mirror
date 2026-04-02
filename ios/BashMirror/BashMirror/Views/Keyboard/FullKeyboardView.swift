@@ -1,5 +1,66 @@
 import SwiftUI
 
+// MARK: - Combined Key Shortcut Model
+
+struct KeyCombo: Identifiable {
+    let id = UUID()
+    let label: String      // Display label: "^C"
+    let sublabel: String   // Description: "Kill"
+    let value: String      // ASCII value to send
+}
+
+// MARK: - Shortcuts Bar
+
+struct ShortcutsBar: View {
+    let onKey: (String) -> Void
+
+    private let combos: [KeyCombo] = [
+        KeyCombo(label: "^C", sublabel: "Kill", value: "\u{03}"),
+        KeyCombo(label: "^Z", sublabel: "Stop", value: "\u{1a}"),
+        KeyCombo(label: "^D", sublabel: "EOF", value: "\u{04}"),
+        KeyCombo(label: "^L", sublabel: "Clear", value: "\u{0c}"),
+        KeyCombo(label: "^A", sublabel: "Home", value: "\u{01}"),
+        KeyCombo(label: "^E", sublabel: "End", value: "\u{05}"),
+        KeyCombo(label: "^R", sublabel: "Search", value: "\u{12}"),
+        KeyCombo(label: "^U", sublabel: "Kill ln", value: "\u{15}"),
+        KeyCombo(label: "^W", sublabel: "Del wd", value: "\u{17}"),
+        KeyCombo(label: "^K", sublabel: "Cut", value: "\u{0b}"),
+        KeyCombo(label: "^Y", sublabel: "Paste", value: "\u{19}"),
+    ]
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(combos) { combo in
+                    Button(action: {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        onKey(combo.value)
+                    }) {
+                        VStack(spacing: 1) {
+                            Text(combo.label)
+                                .font(Theme.Fonts.captionSmall.weight(.bold))
+                                .foregroundColor(Theme.Colors.warning)
+                            Text(combo.sublabel)
+                                .font(.system(size: 9, weight: .medium, design: .monospaced))
+                                .foregroundColor(Theme.Colors.textTertiary)
+                        }
+                        .frame(width: 52, height: 36)
+                        .background(Theme.Colors.warning.opacity(0.08))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Theme.Radii.key)
+                                .stroke(Theme.Colors.warning.opacity(0.2), lineWidth: 1)
+                        )
+                        .cornerRadius(Theme.Radii.key)
+                    }
+                }
+            }
+            .padding(.horizontal, 6)
+        }
+    }
+}
+
+// MARK: - Full Keyboard
+
 struct FullKeyboardView: View {
     let onKey: (String) -> Void
 
@@ -14,15 +75,20 @@ struct FullKeyboardView: View {
     private let numberRow = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 
     var body: some View {
-        VStack(spacing: 2) {
+        VStack(spacing: 3) {
+            // Combined key shortcuts bar (always visible, scrollable)
+            ShortcutsBar(onKey: onKey)
+                .padding(.bottom, 2)
+
+            // Top row: specials or numbers
             if showNumbers {
                 keyRow(numberRow)
             } else {
-                HStack(spacing: 2) {
+                HStack(spacing: 3) {
                     ForEach(topRow, id: \.self) { key in
                         KeyButton(
                             label: key,
-                            isHighlighted: key == "Ctrl" && isCtrlActive
+                            style: key == "Ctrl" && isCtrlActive ? .ctrl : (key == "Tab" || key == "Ctrl" ? .special : .normal)
                         ) {
                             handleSpecialKey(key)
                         }
@@ -30,49 +96,68 @@ struct FullKeyboardView: View {
                 }
             }
 
+            // Letter rows
             keyRow(row1)
-            keyRow(row2)
 
-            HStack(spacing: 2) {
-                KeyButton(label: "⇧", width: 38, isHighlighted: isShiftActive) {
+            HStack(spacing: 3) {
+                ForEach(row2, id: \.self) { key in
+                    KeyButton(label: displayKey(key)) { sendKey(key) }
+                }
+            }
+            .padding(.horizontal, 12)
+
+            // Row 3 with shift and backspace
+            HStack(spacing: 3) {
+                KeyButton(label: "\u{21E7}", width: 42, style: isShiftActive ? .accent : .special) {
                     isShiftActive.toggle()
                 }
                 ForEach(row3, id: \.self) { key in
                     KeyButton(label: displayKey(key)) { sendKey(key) }
                 }
-                KeyButton(label: "⌫", width: 38) { onKey("\u{7f}") }
+                KeyButton(label: "\u{232B}", width: 42, style: .normal) { onKey("\u{7f}") }
             }
 
-            HStack(spacing: 2) {
-                KeyButton(label: "123", width: 38) { showNumbers.toggle() }
-                KeyButton(label: "Esc", width: 38) { onKey("\u{1b}") }
+            // Bottom row
+            HStack(spacing: 3) {
+                KeyButton(label: "123", width: 42, style: .special) { showNumbers.toggle() }
+                KeyButton(label: "Esc", width: 38, style: .special) { onKey("\u{1b}") }
 
-                // Arrow keys inline
-                KeyButton(label: "←", width: 28) { onKey("\u{1b}[D") }
-                KeyButton(label: "↓", width: 28) { onKey("\u{1b}[B") }
-                KeyButton(label: "↑", width: 28) { onKey("\u{1b}[A") }
-                KeyButton(label: "→", width: 28) { onKey("\u{1b}[C") }
+                KeyButton(label: "\u{2190}", width: 30, style: .arrow) { onKey("\u{1b}[D") }
+                KeyButton(label: "\u{2193}", width: 30, style: .arrow) { onKey("\u{1b}[B") }
+                KeyButton(label: "\u{2191}", width: 30, style: .arrow) { onKey("\u{1b}[A") }
+                KeyButton(label: "\u{2192}", width: 30, style: .arrow) { onKey("\u{1b}[C") }
 
                 // Spacebar
-                Button(action: { onKey(" ") }) {
-                    Text(" ")
-                        .frame(maxWidth: .infinity, minHeight: 30)
-                        .background(Color(UIColor.systemGray4))
-                        .cornerRadius(4)
+                Button(action: {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    onKey(" ")
+                }) {
+                    Text("space")
+                        .font(Theme.Fonts.captionSmall)
+                        .foregroundColor(Theme.Colors.textTertiary)
+                        .frame(maxWidth: .infinity, minHeight: 36)
+                        .background(Theme.Colors.keyBackground)
+                        .cornerRadius(Theme.Radii.key)
                 }
 
-                KeyButton(label: "↵", width: 46) { onKey("\r") }
+                KeyButton(label: "\u{21B5}", width: 50, style: .enter) { onKey("\r") }
             }
         }
-        .padding(.horizontal, 2)
-        .padding(.top, 3)
-        .padding(.bottom, 2)
-        .background(Color(UIColor.systemGray6))
+        .padding(.horizontal, 6)
+        .padding(.top, 4)
+        .padding(.bottom, 8)
+        .background(Theme.Colors.keyboardBackground)
+        .overlay(
+            Rectangle()
+                .fill(Theme.Colors.keyboardBorder)
+                .frame(height: 1),
+            alignment: .top
+        )
     }
 
     @ViewBuilder
     private func keyRow(_ keys: [String]) -> some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 3) {
             ForEach(keys, id: \.self) { key in
                 KeyButton(label: displayKey(key)) { sendKey(key) }
             }
@@ -112,21 +197,65 @@ struct FullKeyboardView: View {
     }
 }
 
+// MARK: - Key Button
+
+enum KeyStyle {
+    case normal, special, accent, ctrl, arrow, enter
+}
+
 struct KeyButton: View {
     let label: String
     var width: CGFloat? = nil
-    var isHighlighted: Bool = false
+    var style: KeyStyle = .normal
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            action()
+        }) {
             Text(label)
-                .font(.system(size: 13, design: .monospaced))
-                .foregroundColor(.white)
-                .frame(minWidth: width, minHeight: 30)
+                .font(Theme.Fonts.bodySmall)
+                .foregroundColor(foregroundColor)
+                .frame(minWidth: width, minHeight: 36)
                 .frame(maxWidth: width != nil ? width : .infinity)
-                .background(isHighlighted ? Color.orange.opacity(0.6) : Color(UIColor.systemGray4))
-                .cornerRadius(4)
+                .background(backgroundColor)
+                .overlay(borderOverlay)
+                .cornerRadius(Theme.Radii.key)
+        }
+    }
+
+    private var foregroundColor: Color {
+        switch style {
+        case .normal: return Theme.Colors.textPrimary
+        case .special: return Theme.Colors.textSecondary
+        case .accent: return Theme.Colors.accent
+        case .ctrl: return Theme.Colors.warning
+        case .arrow: return Theme.Colors.textTertiary
+        case .enter: return Theme.Colors.accent
+        }
+    }
+
+    private var backgroundColor: Color {
+        switch style {
+        case .ctrl: return Theme.Colors.warning.opacity(0.15)
+        case .accent: return Theme.Colors.accent.opacity(0.1)
+        case .enter: return Theme.Colors.accent.opacity(0.08)
+        default: return Theme.Colors.keyBackground
+        }
+    }
+
+    @ViewBuilder
+    private var borderOverlay: some View {
+        switch style {
+        case .accent:
+            RoundedRectangle(cornerRadius: Theme.Radii.key)
+                .stroke(Theme.Colors.accentBorder, lineWidth: 1)
+        case .enter:
+            RoundedRectangle(cornerRadius: Theme.Radii.key)
+                .stroke(Theme.Colors.accent.opacity(0.25), lineWidth: 1)
+        default:
+            EmptyView()
         }
     }
 }
