@@ -2,6 +2,9 @@ use rand::Rng;
 use sha2::{Digest, Sha256};
 use std::net::IpAddr;
 use std::time::{Duration, Instant};
+use subtle::ConstantTimeEq;
+use tracing::debug;
+use zeroize::Zeroizing;
 
 pub struct PairingManager {
     active_token: Option<PairingToken>,
@@ -9,7 +12,7 @@ pub struct PairingManager {
 }
 
 pub struct PairingToken {
-    pub token: String,
+    pub token: Zeroizing<String>,
     pub short_code: String,
     pub created_at: Instant,
     pub ttl: Duration,
@@ -26,6 +29,14 @@ impl PairingToken {
             .map(|d| d.as_secs())
             .unwrap_or(0)
     }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum AuthResult {
+    Valid,
+    Expired,
+    Invalid,
+    NoToken,
 }
 
 impl PairingManager {
@@ -46,7 +57,7 @@ impl PairingManager {
         let short_code = format!("{:06}", code_num);
 
         self.active_token = Some(PairingToken {
-            token,
+            token: Zeroizing::new(token),
             short_code,
             created_at: Instant::now(),
             ttl: self.token_ttl,
@@ -55,14 +66,41 @@ impl PairingManager {
         self.active_token.as_ref().unwrap()
     }
 
-    pub fn validate_token(&mut self, token: &str) -> bool {
-        if let Some(ref active) = self.active_token {
-            if !active.is_expired() && active.token == token {
-                self.active_token = None; // one-time use
-                return true;
+    pub fn validate_token(&mut self, token: &str) -> AuthResult {
+        match &self.active_token {
+            None => {
+                debug!("validate_token: no active token");
+                AuthResult::NoToken
+            }
+            Some(active) if active.is_expired() => {
+                debug!(
+                    "validate_token: token expired ({}s ago)",
+                    active.created_at.elapsed().as_secs().saturating_sub(active.ttl.as_secs())
+                );
+                self.active_token = None;
+                AuthResult::Expired
+            }
+            Some(active) => {
+                let active_bytes = active.token.as_bytes();
+                let input_bytes = token.as_bytes();
+                debug!(
+                    "validate_token: stored len={} first8={:?}, input len={} first8={:?}",
+                    active_bytes.len(),
+                    String::from_utf8_lossy(&active_bytes[..active_bytes.len().min(8)]),
+                    input_bytes.len(),
+                    String::from_utf8_lossy(&input_bytes[..input_bytes.len().min(8)]),
+                );
+                if active_bytes.len() == input_bytes.len()
+                    && active_bytes.ct_eq(input_bytes).into()
+                {
+                    self.active_token = None;
+                    AuthResult::Valid
+                } else {
+                    debug!("validate_token: mismatch (len match={})", active_bytes.len() == input_bytes.len());
+                    AuthResult::Invalid
+                }
             }
         }
-        false
     }
 
     pub fn current_token(&self) -> Option<&PairingToken> {
