@@ -56,6 +56,7 @@ struct TerminalContainerView: View {
 struct SessionTabBar: View {
     @EnvironmentObject var connectionManager: ConnectionManager
     @Binding var showKeyboard: Bool
+    @State private var showSessionManager = false
 
     var body: some View {
         HStack(spacing: 4) {
@@ -103,6 +104,16 @@ struct SessionTabBar: View {
 
             Spacer()
 
+            // Session manager
+            Button(action: { showSessionManager = true }) {
+                Image(systemName: "rectangle.stack")
+                    .font(.system(size: 14))
+                    .foregroundColor(Theme.Colors.textSecondary)
+                    .frame(width: 32, height: 32)
+                    .background(Theme.Colors.surfaceLight.opacity(0.5))
+                    .cornerRadius(8)
+            }
+
             // Keyboard toggle
             Button(action: { showKeyboard.toggle() }) {
                 Image(systemName: showKeyboard ? "keyboard.chevron.compact.down" : "keyboard")
@@ -134,5 +145,8 @@ struct SessionTabBar: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(Theme.Colors.background)
+        .sheet(isPresented: $showSessionManager) {
+            SessionManagerView()
+        }
     }
 }

@@ -13,6 +13,12 @@ class ConnectionManager: ObservableObject {
     @Published var activeSessionId: String?
     @Published var errorMessage: String?
 
+    // Connection metadata for session manager
+    private(set) var connectedHost: String = ""
+    private(set) var connectedPort: Int = 0
+    private(set) var connectedAt: Date?
+    private(set) var useTLS: Bool = false
+
     let webSocket = WebSocketService()
     private var terminalOutputHandlers: [String: (String) -> Void] = [:]
     private var cancellables = Set<AnyCancellable>()
@@ -44,8 +50,22 @@ class ConnectionManager: ObservableObject {
         connect(host: host, port: port, token: token, fingerprint: fingerprint)
     }
 
+    func disconnect() {
+        webSocket.disconnect()
+        state = .disconnected
+        sessions = []
+        activeSessionId = nil
+        connectedHost = ""
+        connectedPort = 0
+        connectedAt = nil
+        useTLS = false
+    }
+
     func connect(host: String, port: Int, token: String, fingerprint: String? = nil) {
         state = .connecting
+        connectedHost = host
+        connectedPort = port
+        useTLS = fingerprint != nil && !fingerprint!.isEmpty
 
         // Use wss:// when fingerprint is present (TLS enabled), ws:// otherwise
         let scheme = (fingerprint != nil && !fingerprint!.isEmpty) ? "wss" : "ws"
@@ -90,6 +110,7 @@ class ConnectionManager: ObservableObject {
         switch msg {
         case .authOk:
             state = .connected
+            connectedAt = Date()
             // Auto-create first session
             createSession()
 

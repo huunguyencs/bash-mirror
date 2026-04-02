@@ -21,10 +21,12 @@
 		C3D720C9C81522111F5984B1 /* WebSocketService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7F43DBAC9DB7F10BD4A07B /* WebSocketService.swift */; };
 		C6E26BD024A837A8922723E9 /* xterm.js in Resources */ = {isa = PBXBuildFile; fileRef = 60BEE34E6CDE1017ECB18E72 /* xterm.js */; };
 		C8965E29A356C3F59239DE8F /* xterm-addon-fit.js in Resources */ = {isa = PBXBuildFile; fileRef = CE39153CD09F0F059AD3789C /* xterm-addon-fit.js */; };
+		D0FA95C39C812C084CA5359C /* SessionManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A86BAE8A8B691AF59F81DC5 /* SessionManagerView.swift */; };
 		D3A2AF6912A971DCD8652C27 /* TerminalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 271CF0524A689C907C973427 /* TerminalView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1A86BAE8A8B691AF59F81DC5 /* SessionManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManagerView.swift; sourceTree = "<group>"; };
 		2177973234CE15AA316B10B7 /* BashMirrorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BashMirrorApp.swift; sourceTree = "<group>"; };
 		271CF0524A689C907C973427 /* TerminalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalView.swift; sourceTree = "<group>"; };
 		35420A9BCAAFD4E1F8BC3366 /* BashMirror.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BashMirror.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -85,6 +87,7 @@
 			children = (
 				C220BE3FD3751622AC94A71B /* ManualConnectView.swift */,
 				DB833A82ACE5483B6FAF2CB8 /* ScannerView.swift */,
+				1A86BAE8A8B691AF59F81DC5 /* SessionManagerView.swift */,
 				D2289313C6C772133B7514E4 /* TerminalContainerView.swift */,
 				271CF0524A689C907C973427 /* TerminalView.swift */,
 				BADD5FF44621FE6C5A3B5894 /* Keyboard */,
@@ -197,6 +200,7 @@
 				19F0E7C496ACB8A9A2BEEE97 /* ManualConnectView.swift in Sources */,
 				82E3572159698C1CB0078EE0 /* ProtocolMessages.swift in Sources */,
 				30AB7B6E909F2C5FC26B925F /* ScannerView.swift in Sources */,
+				D0FA95C39C812C084CA5359C /* SessionManagerView.swift in Sources */,
 				2F1356E87D135F06A14DD07D /* TerminalContainerView.swift in Sources */,
 				D3A2AF6912A971DCD8652C27 /* TerminalView.swift in Sources */,
 				BD77A9949EF88760C6753D50 /* Theme.swift in Sources */,
