@@ -7,6 +7,13 @@ Control your terminal from your phone. Run a lightweight server on your Mac or L
 ![iOS](https://img.shields.io/badge/iOS-26.0+-black)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+<p align="center">
+  <img src="docs/images/dashboard.png" alt="Web Dashboard" width="700" />
+</p>
+<p align="center">
+  <img src="docs/images/mobile.png" alt="iOS Terminal" width="300" />
+</p>
+
 ## How It Works
 
 ```
