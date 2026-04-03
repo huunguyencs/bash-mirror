@@ -36,6 +36,7 @@ struct ContentView: View {
 struct ScannerContainerView: View {
     @EnvironmentObject var connectionManager: ConnectionManager
     @State private var showManualEntry = false
+    @State private var showScanner = false
     @State private var showError = false
 
     var body: some View {
@@ -78,21 +79,15 @@ struct ScannerContainerView: View {
                             )
 
                         VStack(spacing: 16) {
-                            Image(systemName: "chevron.right.square")
+                            Image(systemName: "qrcode.viewfinder")
                                 .font(.system(size: 40, weight: .light))
                                 .foregroundColor(Theme.Colors.accent)
 
-                            Text("Point camera at\nQR code on terminal")
+                            Text("Tap Scan QR Code\nto open camera")
                                 .font(Theme.Fonts.bodySmall)
                                 .foregroundColor(Theme.Colors.textTertiary)
                                 .multilineTextAlignment(.center)
                         }
-
-                        // Actual scanner overlay (invisible but functional)
-                        ScannerView { code in
-                            connectionManager.connectFromQR(code)
-                        }
-                        .opacity(0.01) // Hidden but active for camera capture
                     }
                     .frame(width: 200, height: 200)
 
@@ -137,9 +132,7 @@ struct ScannerContainerView: View {
 
                 // CTAs
                 VStack(spacing: 12) {
-                    Button(action: {
-                        // Scanner is always active above; this is a visual affordance
-                    }) {
+                    Button(action: { showScanner = true }) {
                         Text("Scan QR Code")
                             .font(Theme.Fonts.body.weight(.semibold))
                             .foregroundColor(Theme.Colors.background)
@@ -185,8 +178,59 @@ struct ScannerContainerView: View {
                 }
             }
         }
+        .fullScreenCover(isPresented: $showScanner) {
+            QRScannerSheet(onScanned: { code in
+                showScanner = false
+                connectionManager.connectFromQR(code)
+            }, onDismiss: {
+                showScanner = false
+            })
+        }
         .sheet(isPresented: $showManualEntry) {
             ManualConnectView()
         }
+    }
+}
+
+// MARK: - QR Scanner Sheet
+
+struct QRScannerSheet: View {
+    let onScanned: (String) -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        ZStack {
+            // Full-screen camera
+            ScannerView(onScan: onScanned)
+                .ignoresSafeArea()
+
+            // Close button overlay
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: onDismiss) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 36, height: 36)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Circle())
+                    }
+                    .padding(24)
+                }
+                Spacer()
+
+                // Bottom hint
+                Text("Point at QR code from terminal")
+                    .font(Theme.Fonts.bodySmall)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Color.black.opacity(0.5))
+                    .cornerRadius(Theme.Radii.button)
+                    .padding(.bottom, 48)
+            }
+        }
+        .background(Color.black)
     }
 }
