@@ -61,6 +61,14 @@ struct Cli {
     /// Maximum concurrent PTY sessions
     #[arg(long, default_value = "4")]
     max_sessions: usize,
+
+    /// Disable auto-opening dashboard in browser
+    #[arg(long)]
+    no_open: bool,
+
+    /// Dashboard web UI port (0 = random)
+    #[arg(long, default_value = "0")]
+    dashboard_port: u16,
 }
 
 #[tokio::main]
@@ -126,6 +134,9 @@ async fn main() -> Result<()> {
 
     // Event channels
     let (event_tx, event_rx) = mpsc::unbounded_channel::<ServerEvent>();
+
+    // Broadcast channel for log events (web dashboard SSE)
+    let (log_tx, _log_rx) = tokio::sync::broadcast::channel::<String>(256);
     let (action_tx, mut action_rx) = mpsc::unbounded_channel::<DashboardAction>();
 
     // Server config
@@ -133,6 +144,7 @@ async fn main() -> Result<()> {
         tls_acceptor,
         max_connections: cli.max_connections,
         auth_timeout_secs: cli.auth_timeout,
+        log_broadcast: Some(log_tx.clone()),
     };
 
     // Start WebSocket server
@@ -154,6 +166,27 @@ async fn main() -> Result<()> {
         }
     });
 
+    // Start web dashboard
+    let dashboard_state = web_dashboard::DashboardState {
+        pairing: pairing.clone(),
+        sessions: session_mgr.clone(),
+        log_tx: log_tx.clone(),
+        server_url: format!("{}://{}:{}", ws_scheme, lan_ip, port),
+        started_at: std::time::Instant::now(),
+    };
+
+    let dashboard_addr = web_dashboard::start_dashboard(
+        dashboard_state,
+        cli.dashboard_port,
+    ).await?;
+
+    let dashboard_url = format!("http://{}", dashboard_addr);
+    info!("Web dashboard: {}", dashboard_url);
+
+    if !cli.no_open {
+        let _ = open::that(&dashboard_url);
+    }
+
     if cli.no_tui {
         // Simple mode: print connection info and wait
         println!("\n  bash-mirror v0.1.0");
@@ -166,6 +199,7 @@ async fn main() -> Result<()> {
         } else {
             println!("  TLS:   disabled (use --no-tls only for development)");
         }
+        println!("  Dashboard: {}", dashboard_url);
         println!();
 
         // Print QR code

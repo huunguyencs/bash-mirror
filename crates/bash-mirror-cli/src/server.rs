@@ -11,7 +11,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::net::TcpListener;
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::{broadcast, mpsc, Mutex};
 use tokio_rustls::TlsAcceptor;
 use tokio_tungstenite::accept_hdr_async;
 use tracing::{error, info, warn};
@@ -34,6 +34,7 @@ pub struct ServerConfig {
     pub tls_acceptor: Option<TlsAcceptor>,
     pub max_connections: usize,
     pub auth_timeout_secs: u64,
+    pub log_broadcast: Option<broadcast::Sender<String>>,
 }
 
 /// Rate limiter tracking failed auth attempts per IP
@@ -143,6 +144,7 @@ pub async fn run_server(
         let tls_acceptor = config.tls_acceptor.clone();
         let auth_timeout = config.auth_timeout_secs;
         let rate_limiter = rate_limiter.clone();
+        let log_broadcast = config.log_broadcast.clone();
 
         tokio::spawn(async move {
             let _guard = _guard; // move guard into task
@@ -150,7 +152,7 @@ pub async fn run_server(
             let result = if let Some(acceptor) = tls_acceptor {
                 match acceptor.accept(stream).await {
                     Ok(tls_stream) => {
-                        accept_and_handle(tls_stream, peer_addr, session_mgr, pairing, event_tx, auth_timeout, rate_limiter).await
+                        accept_and_handle(tls_stream, peer_addr, session_mgr, pairing, event_tx, auth_timeout, rate_limiter, log_broadcast).await
                     }
                     Err(e) => {
                         error!("TLS handshake failed from {}: {}", peer_addr, e);
@@ -158,7 +160,7 @@ pub async fn run_server(
                     }
                 }
             } else {
-                accept_and_handle(stream, peer_addr, session_mgr, pairing, event_tx, auth_timeout, rate_limiter).await
+                accept_and_handle(stream, peer_addr, session_mgr, pairing, event_tx, auth_timeout, rate_limiter, log_broadcast).await
             };
 
             if let Err(e) = result {
@@ -176,6 +178,7 @@ async fn accept_and_handle<S>(
     event_tx: mpsc::UnboundedSender<ServerEvent>,
     auth_timeout: u64,
     rate_limiter: Arc<Mutex<RateLimiter>>,
+    log_broadcast: Option<broadcast::Sender<String>>,
 ) -> Result<()>
 where
     S: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin + Send + 'static,
@@ -201,7 +204,7 @@ where
     })
     .await?;
 
-    handle_connection(ws, peer_addr, session_mgr, pairing, event_tx, auth_timeout, rate_limiter).await
+    handle_connection(ws, peer_addr, session_mgr, pairing, event_tx, auth_timeout, rate_limiter, log_broadcast).await
 }
 
 async fn handle_connection<S>(
@@ -212,11 +215,15 @@ async fn handle_connection<S>(
     event_tx: mpsc::UnboundedSender<ServerEvent>,
     auth_timeout_secs: u64,
     rate_limiter: Arc<Mutex<RateLimiter>>,
+    log_broadcast: Option<broadcast::Sender<String>>,
 ) -> Result<()>
 where
     S: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin + Send + 'static,
 {
     let _ = event_tx.send(ServerEvent::ClientConnected { addr: peer_addr });
+    if let Some(ref log_tx) = log_broadcast {
+        let _ = log_tx.send(format!("Client connected: {}", peer_addr));
+    }
     info!("Client connected: {}", peer_addr);
 
     let (mut ws_tx, mut ws_rx) = ws.split();
@@ -244,8 +251,11 @@ where
                                         .await?;
                                     let _ = event_tx.send(ServerEvent::ClientAuthenticated {
                                         addr: peer_addr,
-                                        device_id,
+                                        device_id: device_id.clone(),
                                     });
+                                    if let Some(ref log_tx) = log_broadcast {
+                                        let _ = log_tx.send(format!("Client authenticated: {}", device_id));
+                                    }
                                     return Ok::<bool, anyhow::Error>(true);
                                 }
                                 result => {
@@ -309,6 +319,9 @@ where
     if !authenticated {
         info!("Client {} failed authentication", peer_addr);
         let _ = event_tx.send(ServerEvent::ClientDisconnected { addr: peer_addr });
+        if let Some(ref log_tx) = log_broadcast {
+            let _ = log_tx.send(format!("Client disconnected: {}", peer_addr));
+        }
         return Ok(());
     }
 
@@ -331,6 +344,7 @@ where
                                     &session_mgr,
                                     &event_tx,
                                     &pty_out_tx,
+                                    &log_broadcast,
                                 ).await?;
                             }
                             Err(e) => {
@@ -374,6 +388,9 @@ where
     }
 
     let _ = event_tx.send(ServerEvent::ClientDisconnected { addr: peer_addr });
+    if let Some(ref log_tx) = log_broadcast {
+        let _ = log_tx.send(format!("Client disconnected: {}", peer_addr));
+    }
     Ok(())
 }
 
@@ -383,6 +400,7 @@ async fn handle_client_message<S>(
     session_mgr: &Arc<Mutex<SessionManager>>,
     event_tx: &mpsc::UnboundedSender<ServerEvent>,
     pty_out_tx: &mpsc::UnboundedSender<(String, Vec<u8>)>,
+    log_broadcast: &Option<broadcast::Sender<String>>,
 ) -> Result<()>
 where
     S: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
@@ -417,6 +435,9 @@ where
                     let _ = event_tx.send(ServerEvent::SessionCreated {
                         session_id: session_id.clone(),
                     });
+                    if let Some(ref log_tx) = log_broadcast {
+                        let _ = log_tx.send(format!("Session created: {}", session_id));
+                    }
 
                     let msg = ServerMessage::SessionCreated {
                         session: session_id,
@@ -445,6 +466,9 @@ where
                     let _ = event_tx.send(ServerEvent::SessionClosed {
                         session_id: session.clone(),
                     });
+                    if let Some(ref log_tx) = log_broadcast {
+                        let _ = log_tx.send(format!("Session closed: {}", session));
+                    }
                     let msg = ServerMessage::SessionClosed { session };
                     ws_tx
                         .send(Message::Text(serde_json::to_string(&msg)?))
