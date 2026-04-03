@@ -1,5 +1,6 @@
 mod dashboard;
 mod server;
+mod web_dashboard;
 
 use anyhow::Result;
 use bash_mirror_core::auth::PairingManager;
