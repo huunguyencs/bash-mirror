@@ -37,7 +37,6 @@ struct ScannerContainerView: View {
     @EnvironmentObject var connectionManager: ConnectionManager
     @State private var showManualEntry = false
     @State private var showScanner = false
-    @State private var showError = false
 
     var body: some View {
         ZStack {
@@ -103,7 +102,7 @@ struct ScannerContainerView: View {
                     }
 
                     // Auth error
-                    if showError, let error = connectionManager.authError {
+                    if let error = connectionManager.authError {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle")
                                 .font(.system(size: 14))
@@ -124,7 +123,6 @@ struct ScannerContainerView: View {
                         .padding(.horizontal, 32)
                         .onTapGesture {
                             connectionManager.authError = nil
-                            showError = false
                         }
                     }
                 }
@@ -169,14 +167,10 @@ struct ScannerContainerView: View {
                 .padding(.bottom, 16)
             }
         }
-        .onChange(of: connectionManager.authError) {
-            if connectionManager.authError != nil {
-                showError = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                    showError = false
-                    connectionManager.authError = nil
-                }
-            }
+        .task(id: connectionManager.authError) {
+            guard connectionManager.authError != nil else { return }
+            try? await Task.sleep(for: .seconds(5))
+            connectionManager.authError = nil
         }
         .fullScreenCover(isPresented: $showScanner) {
             QRScannerSheet(onScanned: { code in
