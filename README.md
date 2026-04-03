@@ -66,7 +66,8 @@ cd bash-mirror
 # Build
 cargo build --release
 
-# The binary is at target/release/bash-mirror
+# Install to ~/.cargo/bin (makes `bash-mirror` available globally)
+cargo install --path crates/bash-mirror-cli --locked
 ```
 
 ### iOS App

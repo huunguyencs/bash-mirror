@@ -9,19 +9,27 @@ pub struct SessionManager {
     sessions: HashMap<String, PtySession>,
     output_rxs: HashMap<String, mpsc::UnboundedReceiver<Vec<u8>>>,
     shell: String,
+    max_sessions: usize,
 }
 
 impl SessionManager {
-    pub fn new(shell: String) -> Self {
+    pub fn new(shell: String, max_sessions: usize) -> Self {
         Self {
             sessions: HashMap::new(),
             output_rxs: HashMap::new(),
             shell,
+            max_sessions,
         }
     }
 
     pub fn create_session(&mut self) -> Result<(String, String)> {
-        let id = Uuid::new_v4().to_string()[..8].to_string();
+        if self.sessions.len() >= self.max_sessions {
+            return Err(anyhow!(
+                "max sessions reached ({})",
+                self.max_sessions
+            ));
+        }
+        let id = Uuid::new_v4().to_string();
         let (session, output_rx) = PtySession::spawn(id.clone(), &self.shell, 80, 24)?;
         self.sessions.insert(id.clone(), session);
         self.output_rxs.insert(id.clone(), output_rx);

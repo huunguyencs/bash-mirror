@@ -196,6 +196,7 @@ dependencies = [
  "qr2term",
  "qrcode",
  "ratatui",
+ "serde",
  "serde_json",
  "tokio",
  "tokio-rustls",
