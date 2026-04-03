@@ -44,7 +44,7 @@ struct ShortcutsBar: View {
                                 .font(.system(size: 9, weight: .medium, design: .monospaced))
                                 .foregroundColor(Theme.Colors.textTertiary)
                         }
-                        .frame(width: 52, height: 36)
+                        .frame(width: 52, height: 40)
                         .background(Theme.Colors.warning.opacity(0.08))
                         .overlay(
                             RoundedRectangle(cornerRadius: Theme.Radii.key)
@@ -71,7 +71,7 @@ struct FullKeyboardView: View {
     private let topRow = ["Tab", "Ctrl", "~", "`", "|", "/", "-", "=", "[", "]"]
     private let row1 = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"]
     private let row2 = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"]
-    private let row3 = ["z", "x", "c", "v", "b", "n", "m", ","]
+    private let row3 = ["z", "x", "c", "v", "b", "n", "m", ",", "."]
     private let numberRow = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 
     var body: some View {
@@ -135,7 +135,7 @@ struct FullKeyboardView: View {
                     Text("space")
                         .font(Theme.Fonts.captionSmall)
                         .foregroundColor(Theme.Colors.textTertiary)
-                        .frame(maxWidth: .infinity, minHeight: 36)
+                        .frame(maxWidth: .infinity, minHeight: 40)
                         .background(Theme.Colors.keyBackground)
                         .cornerRadius(Theme.Radii.key)
                 }
@@ -217,7 +217,7 @@ struct KeyButton: View {
             Text(label)
                 .font(Theme.Fonts.bodySmall)
                 .foregroundColor(foregroundColor)
-                .frame(minWidth: width, minHeight: 36)
+                .frame(minWidth: width, minHeight: 40)
                 .frame(maxWidth: width != nil ? width : .infinity)
                 .background(backgroundColor)
                 .overlay(borderOverlay)
