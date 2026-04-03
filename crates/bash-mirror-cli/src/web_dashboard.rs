@@ -23,6 +23,9 @@ pub struct DashboardState {
     pub sessions: Arc<Mutex<SessionManager>>,
     pub log_tx: broadcast::Sender<String>,
     pub server_url: String,
+    pub lan_ip: std::net::IpAddr,
+    pub port: u16,
+    pub cert_fingerprint: String,
     pub started_at: Instant,
 }
 
@@ -138,7 +141,7 @@ async fn get_qr(State(state): State<DashboardState>) -> Result<Html<String>, Sta
     };
     drop(pm);
 
-    let qr_data = format!("{}?token={}", state.server_url, token);
+    let qr_data = PairingManager::qr_payload(state.lan_ip, state.port, &token, &state.cert_fingerprint);
     let code = QrCode::new(qr_data.as_bytes()).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     let svg_str = code
         .render::<svg::Color>()

@@ -29,9 +29,14 @@ class ConnectionManager: ObservableObject {
             self?.handleMessage(msg)
         }
         webSocket.onDisconnect = { [weak self] in
-            self?.state = .disconnected
-            self?.sessions = []
-            self?.activeSessionId = nil
+            guard let self else { return }
+            // If we were connecting (not yet authenticated), this is a connection error
+            if self.state == .connecting {
+                self.authError = "Connection failed — check server address and try again"
+            }
+            self.state = .disconnected
+            self.sessions = []
+            self.activeSessionId = nil
         }
     }
 

@@ -172,6 +172,9 @@ async fn main() -> Result<()> {
         sessions: session_mgr.clone(),
         log_tx: log_tx.clone(),
         server_url: format!("{}://{}:{}", ws_scheme, lan_ip, port),
+        lan_ip,
+        port,
+        cert_fingerprint: cert_fingerprint.clone(),
         started_at: std::time::Instant::now(),
     };
 
