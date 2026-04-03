@@ -104,7 +104,6 @@ struct ManualConnectView: View {
                     Button(action: {
                         guard let portNum = Int(port) else { return }
                         connectionManager.connect(host: host, port: portNum, token: token)
-                        dismiss()
                     }) {
                         Text("Connect")
                             .font(Theme.Fonts.body.weight(.semibold))
@@ -134,6 +133,11 @@ struct ManualConnectView: View {
         .onChange(of: host) { connectionManager.authError = nil }
         .onChange(of: port) { connectionManager.authError = nil }
         .onChange(of: token) { connectionManager.authError = nil }
+        .onChange(of: connectionManager.state) {
+            if connectionManager.state == .connected {
+                dismiss()
+            }
+        }
         .presentationBackground(Theme.Colors.background)
     }
 }
